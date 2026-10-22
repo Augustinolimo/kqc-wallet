@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>KQC Wallet</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#07110b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#07110b;--card:#0e1d14;--card2:#13271b;--line:#1d3526;--g:#1fd16b;--g2:#0a7a4c;--r:#e5322d;--text:#eaf6ee;--mut:#8aa597;--warn:#f5b942;--rad:18px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.flag{height:4px;background:linear-gradient(90deg,#000 0 33%,var(--r) 33% 66%,var(--g2) 66%)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px}
+.brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.3px}
+.brand img{width:30px;height:30px;border-radius:50%}
+.pill{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.pill.live{color:var(--g);border-color:var(--g)}
+.pill.demo{color:var(--warn);border-color:var(--warn)}
+.view{display:none;animation:in .18s ease-out}.view.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{background:radial-gradient(120% 140% at 0 0,#14402b 0,#0e1d14 60%);border:1px solid var(--line);border-radius:24px;padding:20px;margin:8px 0 14px}
+.hero small{color:var(--mut)}
+.total{font-size:2.1rem;font-weight:800;margin:2px 0 14px;letter-spacing:-.5px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.act{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px 4px;font-weight:700;font-size:.82rem;cursor:pointer}
+.act b{display:block;font-size:1.25rem;color:var(--g);margin-bottom:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:16px;margin-bottom:14px}
+h2{font-size:1.25rem;margin:14px 0 4px}h3{font-size:1rem;margin:0 0 10px}
+p.sub{color:var(--mut);margin:0 0 12px;font-size:.92rem}
+label{display:block;font-size:.8rem;font-weight:700;color:var(--mut);margin:12px 0 6px}
+input,select{width:100%;background:#0a160f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:1rem;outline:none}
+input:focus,select:focus{border-color:var(--g)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.amt{font-size:1.5rem;font-weight:800}
+.btn{width:100%;margin-top:16px;background:var(--g);color:#032212;border:0;border-radius:14px;padding:15px;font-size:1.02rem;font-weight:800;cursor:pointer}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.mp{background:#43b02a;color:#fff}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{background:var(--card2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:99px;font-weight:700;font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--g);color:#032212;border-color:var(--g)}
+.asset{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.asset:last-child{border:0}
+.dot{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex:none}
+.grow{flex:1;min-width:0}.grow small{color:var(--mut);display:block}
+.right{text-align:right}.right small{color:var(--mut);display:block}
+.quote{background:#0a160f;border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:14px;font-size:.9rem}
+.quote div{display:flex;justify-content:space-between;padding:2px 0}.quote span:first-child{color:var(--mut)}
+.err{color:#ff7b76;font-size:.85rem;min-height:1.2em;margin-top:8px}
+.flip{display:block;margin:10px auto 0;background:var(--card2);border:1px solid var(--line);color:var(--g);width:42px;height:42px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+.tx{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}.tx:last-child{border:0}
+.tx .ic{width:34px;height:34px;border-radius:50%;background:var(--card2);display:grid;place-items:center;color:var(--g);flex:none}
+.muted{color:var(--mut)}
+nav{position:fixed;left:0;right:0;bottom:0;background:#0a150e;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:none;border:0;color:var(--mut);font-size:.7rem;font-weight:700;padding:6px 10px;cursor:pointer;min-width:60px}
+nav button b{display:block;font-size:1.25rem;line-height:1.2}
+nav button.on{color:var(--g)}
+.sheet{position:fixed;inset:0;z-index:20;display:none}.sheet.on{display:block}
+.sheet .bg{position:absolute;inset:0;background:#000a}
+.sheet .body{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));animation:up .2s ease-out;text-align:center}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.big{font-size:3rem;line-height:1}
+.spin{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--g);border-radius:50%;margin:8px auto;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.phone{background:#000;border:2px solid #333;border-radius:18px;padding:14px;margin:12px 0;text-align:left}
+.phone small{color:#43b02a;font-weight:800}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#fff;color:#07110b;padding:10px 16px;border-radius:99px;font-weight:700;font-size:.9rem;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.on{opacity:1}
+.note{font-size:.8rem;color:var(--mut);margin-top:10px}
+a{color:var(--g)}
+</style>
+</head>
+<body>
+<div class="flag"></div>
+<div class="wrap">
+<header>
+  <div class="brand"><img src="icon-192.png" alt="">KQC Wallet</div>
+  <span id="mode" class="pill">…</span>
+</header>
+
+<!-- HOME -->
+<section id="v-home" class="view on">
+  <div class="hero">
+    <small>Total balance</small>
+    <div class="total" id="total">KES 0</div>
+    <div class="actions">
+      <button class="act" data-go="buy" data-asset="KES"><b>＋</b>Add money</button>
+      <button class="act" data-go="buy"><b>₿</b>Buy</button>
+      <button class="act" data-go="swap"><b>⇄</b>Swap</button>
+      <button class="act" data-go="send"><b>↗</b>Send</button>
+    </div>
+  </div>
+  <div class="card"><h3>Your assets</h3><div id="assets"></div><div class="note" id="pricenote"></div></div>
+  <div class="card"><h3>Recent activity</h3><div id="activity"></div></div>
+</section>
+
+<!-- BUY -->
+<section id="v-buy" class="view">
+  <h2>Buy with M-Pesa</h2>
+  <p class="sub">Pick what you want, enter an amount, approve on your phone. That's it.</p>
+  <div class="card">
+    <label>I want</label>
+    <div class="chips" id="buy-assets"></div>
+    <label for="buy-amt">Pay (KES)</label>
+    <input id="buy-amt" type="number" inputmode="numeric" min="1" step="1" placeholder="1000">
+    <div class="chips" id="buy-quick"></div>
+    <label for="buy-phone">M-Pesa number</label>
+    <input id="buy-phone" type="tel" inputmode="tel" placeholder="0712 345 678" autocomplete="tel">
+    <div class="quote" id="buy-quote"></div>
+    <div class="err" id="buy-err"></div>
+    <button class="btn mp" id="buy-go">Pay with M-Pesa</button>
+    <div class="note" id="buy-note"></div>
+  </div>
+</section>
+
+<!-- SWAP -->
+<section id="v-swap" class="view">
+  <h2>Swap</h2>
+  <p class="sub">Exchange any asset in your wallet instantly.</p>
+  <div class="card">
+    <div class="row"><label for="sw-from" style="margin:0">From</label><button class="chip" id="sw-max">Max</button></div>
+    <div class="row" style="gap:8px;margin-top:6px">
+      <select id="sw-from" style="flex:0 0 38%"></select>
+      <input id="sw-amt" type="number" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="muted" style="font-size:.82rem;margin-top:6px" id="sw-bal"></div>
+    <button class="flip" id="sw-flip" aria-label="Flip">⇅</button>
+    <label for="sw-to">To</label>
+    <div class="row" style="gap:8px">
+      <select id="sw-to" style="flex:0 0 38%"></select>
+      <div class="amt" id="sw-out" style="flex:1;text-align:right">0</div>
+    </div>
+    <div class="quote" id="sw-quote"></div>
+    <label>Slippage tolerance</label>
+    <div class="chips" id="sw-slip"></div>
+    <div class="err" id="sw-err"></div>
+    <button class="btn" id="sw-go">Swap</button>
+  </div>
+</section>
+
+<!-- SEND -->
+<section id="v-send" class="view">
+  <h2>Send</h2>
+  <p class="sub">Send to a contact or paste an address.</p>
+  <div class="card">
+    <label for="sd-asset">Asset</label><select id="sd-asset"></select>
+    <label for="sd-to">Recipient</label>
+    <input id="sd-to" type="text" placeholder="Address, or pick a contact" autocomplete="off" spellcheck="false">
+    <div class="chips" id="sd-contacts"></div>
+    <label for="sd-amt">Amount</label>
+    <input id="sd-amt" type="number" inputmode="decimal" placeholder="0.00">
+    <div class="muted" style="font-size:.82rem;margin-top:6px" id="sd-bal"></div>
+    <div class="err" id="sd-err"></div>
+    <button class="btn" id="sd-go">Review &amp; send</button>
+  </div>
+</section>
+
+<!-- MORE -->
+<section id="v-more" class="view">
+  <h2>More</h2>
+  <div class="card">
+    <h3>Stake KQC</h3>
+    <p class="sub">Illustrative <b>14.5% APY</b>. Staked: <b id="st-staked">0</b> KQC · Earned: <b id="st-earned">0</b> KQC</p>
+    <input id="st-amt" type="number" inputmode="decimal" placeholder="KQC amount">
+    <div class="row" style="gap:8px"><button class="btn" id="st-stake">Stake</button><button class="btn ghost" id="st-unstake">Unstake + claim</button></div>
+    <div class="err" id="st-err"></div>
+  </div>
+  <div class="card">
+    <h3>Bridge KQC</h3>
+    <p class="sub">Move KQC to another network. Fee 0.1% (min 1 KQC). <span id="br-held"></span></p>
+    <select id="br-chain"><option>Base</option><option>Ethereum</option><option>Arbitrum</option><option>Polygon</option></select>
+    <input id="br-amt" type="number" inputmode="decimal" placeholder="KQC amount" style="margin-top:10px">
+    <div class="err" id="br-err"></div>
+    <button class="btn" id="br-go">Bridge</button>
+  </div>
+  <div class="card">
+    <h3>Pay a merchant</h3>
+    <p class="sub">Till or Paybill number, paid from your wallet.</p>
+    <input id="pm-till" type="tel" inputmode="numeric" placeholder="Till / Paybill (5–7 digits)">
+    <input id="pm-amt" type="number" inputmode="decimal" placeholder="Amount" style="margin-top:10px">
+    <select id="pm-from" style="margin-top:10px"><option value="KES">Pay with KES</option><option value="KQC">Pay with KQC</option></select>
+    <div class="err" id="pm-err"></div>
+    <button class="btn" id="pm-go">Pay</button>
+  </div>
+  <div class="card">
+    <h3>Security &amp; verification</h3>
+    <p class="sub">Official KQC artwork carries a post-quantum (ML-DSA-65) seal you can check yourself.</p>
+    <a href="https://rainbow-duckanoo-7ad301.netlify.app" target="_blank" rel="noopener">Open the public seal verifier ↗</a>
+    <p class="note">This build keeps its ledger on this device. Signing of transfers is not yet performed on-chain here; do not store real value in it.</p>
+  </div>
+  <div class="card">
+    <h3>Settings</h3>
+    <p class="sub" id="mode-help"></p>
+    <button class="btn ghost" id="reset">Reset this device's wallet data</button>
+  </div>
+</section>
+</div>
+
+<nav>
+  <button data-go="home" class="on"><b>⌂</b>Home</button>
+  <button data-go="buy"><b>＋</b>Buy</button>
+  <button data-go="swap"><b>⇄</b>Swap</button>
+  <button data-go="send"><b>↗</b>Send</button>
+  <button data-go="more"><b>⋯</b>More</button>
+</nav>
+
+<div class="sheet" id="sheet"><div class="bg"></div><div class="body" id="sheet-body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+
+/* ---------- config ---------- */
+const SYMS = ['KES','KQC','BTC','ETH','SOL','USDT'];
+const META = {
+  KES:{n:'Cash wallet',c:'#e5322d',d:2,i:'KSh'}, KQC:{n:'Kenya Quantum Coin',c:'#0a9a5c',d:2,i:'K'},
+  BTC:{n:'Bitcoin',c:'#f7931a',d:6,i:'₿'}, ETH:{n:'Ethereum',c:'#627eea',d:5,i:'Ξ'},
+  SOL:{n:'Solana',c:'#9945ff',d:4,i:'◎'}, USDT:{n:'Tether USD',c:'#26a17b',d:2,i:'₮'},
+};
+const FEE = { buy:0.015, swap:0.005, bridge:0.001 };
+const APY = 0.145;
+const GECKO = { BTC:'bitcoin', ETH:'ethereum', SOL:'solana', USDT:'tether' };
+let P = { KES:1, KQC:2.5, USDT:129, BTC:11500000, ETH:430000, SOL:23000 };  // KES per unit
+let pricesLive = false, pricesAt = 0;
+let MODE = 'demo', ENV = 'sandbox';
+let S;
+const STARTER = { KES:24240, KQC:15638.71, BTC:0.0042, ETH:0.15, SOL:1.25, USDT:0 };
+
+/* ---------- helpers ---------- */
+const flo = (n,s) => { const m = 10 ** META[s].d; return Math.floor(n * m + 1e-9) / m; };
+const rnd = (n,s) => Number(n.toFixed(META[s].d));
+const fmt = (n,s) => Number(n).toLocaleString('en-KE', { minimumFractionDigits: Math.min(2, META[s].d), maximumFractionDigits: META[s].d });
+const kes = (n) => 'KES ' + Number(n).toLocaleString('en-KE', { maximumFractionDigits: 0 });
+const num = (el) => { const v = parseFloat($(el).value); return Number.isFinite(v) ? v : 0; };
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2600); }
+function normPhone(x){
+  const d = String(x||'').replace(/[\s\-()]/g,'').replace(/^\+/,'');
+  if (/^0[17]\d{8}$/.test(d)) return '254' + d.slice(1);
+  if (/^254[17]\d{8}$/.test(d)) return d;
+  if (/^[17]\d{8}$/.test(d)) return '254' + d;
+  return null;
+}
+const save = () => store.set('kqc2-' + MODE, S);
+function load(){
+  S = store.get('kqc2-' + MODE);
+  if (!S || !S.bal) S = { bal: MODE === 'demo' ? { ...STARTER } : Object.fromEntries(SYMS.map((s) => [s,0])), staked:0, stakeAt:Date.now(), bridged:{}, tx:[], phone:'' };
+}
+function addTx(k, d, v){ S.tx.unshift({ t: Date.now(), k, d, v }); S.tx = S.tx.slice(0, 30); }
+function totalKes(){
+  let t = 0; for (const s of SYMS) t += S.bal[s] * P[s];
+  t += (S.staked + Object.values(S.bridged).reduce((a,b) => a + b, 0)) * P.KQC; return t;
+}
+const earned = () => S.staked * APY * ((Date.now() - S.stakeAt) / 31557600000);
+
+/* ---------- prices ---------- */
+async function refreshPrices(){
+  try {
+    const ids = Object.values(GECKO).join(',');
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 6000);
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=kes', { signal: ctl.signal });
+    clearTimeout(to);
+    if (!r.ok) throw 0;
+    const j = await r.json(); let ok = 0;
+    for (const [sym, id] of Object.entries(GECKO)) if (j[id] && j[id].kes > 0) { P[sym] = j[id].kes; ok++; }
+    if (ok) { pricesLive = true; pricesAt = Date.now(); }
+  } catch { /* keep last known prices */ }
+  renderAll();
+}
+
+/* ---------- M-Pesa client (live = Netlify functions, demo = simulated) ---------- */
+const demo = { result: null };
+const Mpesa = {
+  async push(phone, amount, ref){
+    if (MODE === 'live') {
+      const r = await fetch('/.netlify/functions/mpesa?a=push', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ phone, amount, ref }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'Could not start the M-Pesa request');
+      return { id: j.checkoutRequestId };
+    }
+    demo.result = null; return { id: 'demo-' + Date.now() };
+  },
+  async status(id){
+    if (MODE === 'live') {
+      const r = await fetch('/.netlify/functions/mpesa?a=status&id=' + encodeURIComponent(id), { cache:'no-store' });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || 'status');
+      return j;
+    }
+    return demo.result || { status:'pending' };
+  },
+};
+
+/* ---------- bottom sheet + STK flow ---------- */
+let sheetToken = 0;
+function sheet(html){ $('#sheet-body').innerHTML = html; $('#sheet').classList.add('on'); }
+function closeSheet(){ $('#sheet').classList.remove('on'); sheetToken++; }
+$('#sheet .bg').addEventListener('click', closeSheet);
+
+async function runStk({ phone, amount, label, onSuccess }){
+  const token = ++sheetToken;
+  const live = () => token === sheetToken;
+  sheet('<div class="spin"></div><h3>Contacting M-Pesa…</h3>');
+  let id;
+  try { id = (await Mpesa.push(phone, amount, 'KQC')).id; }
+  catch (e) { sheet('<div class="big">⚠️</div><h3>' + esc(e.message) + '</h3><button class="btn ghost" id="sh-x">Close</button>'); $('#sh-x').onclick = closeSheet; return; }
+
+  const demoUi = MODE === 'demo'
+    ? '<div class="phone"><small>M-PESA (simulated)</small><div>Pay KES ' + amount.toLocaleString() + ' to KQC Wallet?</div>'
+      + '<input id="sh-pin" type="password" inputmode="numeric" maxlength="4" placeholder="Enter any 4-digit PIN" style="margin-top:10px">'
+      + '<div class="row" style="gap:8px"><button class="btn" id="sh-ok" style="margin-top:10px">OK</button><button class="btn ghost" id="sh-no" style="margin-top:10px">Cancel</button></div></div>'
+      + '<div class="note">Demo mode: no real money moves.</div>'
+    : '<p class="sub">Enter your M-Pesa PIN on your phone to approve <b>KES ' + amount.toLocaleString() + '</b>.</p>';
+  sheet('<div class="spin"></div><h3>Check your phone</h3>' + demoUi + '<p class="note" id="sh-t"></p><button class="btn ghost" id="sh-hide">Hide (keeps waiting)</button>');
+  $('#sh-hide').onclick = () => { $('#sheet').classList.remove('on'); };
+  if (MODE === 'demo') {
+    $('#sh-ok').onclick = () => { if (($('#sh-pin').value || '').length === 4) demo.result = { status:'success' }; else toast('Enter 4 digits'); };
+    $('#sh-no').onclick = () => { demo.result = { status:'failed', reason:'You cancelled the request' }; };
+  }
+
+  const started = Date.now(); let fails = 0, res;
+  while (true) {
+    await new Promise((r) => setTimeout(r, 2500));
+    const left = 100 - Math.round((Date.now() - started) / 1000);
+    if (live() && $('#sh-t')) $('#sh-t').textContent = 'Waiting… ' + Math.max(left, 0) + 's';
+    try { res = await Mpesa.status(id); fails = 0; } catch { if (++fails >= 4) { res = { status:'failed', reason:'Lost connection while confirming' }; } else continue; }
+    if (res.status !== 'pending') break;
+    if (left <= 0) { res = { status:'failed', reason:'No response from the phone' }; break; }
+  }
+  if (res.status === 'success') {
+    onSuccess(); save(); renderAll();
+    if (live()) { sheet('<div class="big">✅</div><h3>' + esc(label) + '</h3><p class="sub">Payment confirmed.</p><button class="btn" id="sh-x">Done</button>'); $('#sh-x').onclick = closeSheet; }
+    else toast('✅ ' + label);
+  } else if (live()) {
+    sheet('<div class="big">❌</div><h3>Not completed</h3><p class="sub">' + esc(res.reason || 'The payment failed') + '</p><button class="btn" id="sh-x">Try again</button>');
+    $('#sh-x').onclick = closeSheet;
+  } else toast('M-Pesa: ' + (res.reason || 'failed'));
+}
+
+function confirmSheet(title, lines, okLabel, onOk){
+  sheet('<h3>' + esc(title) + '</h3><div class="quote" style="text-align:left">' + lines.map(([a,b]) => '<div><span>' + esc(a) + '</span><span>' + esc(b) + '</span></div>').join('') + '</div>'
+    + '<button class="btn" id="sh-ok">' + esc(okLabel) + '</button><button class="btn ghost" id="sh-x">Cancel</button>');
+  $('#sh-x').onclick = closeSheet; $('#sh-ok').onclick = () => { closeSheet(); onOk(); };
+}
+
+/* ---------- views ---------- */
+function go(v, asset){
+  $$('.view').forEach((e) => e.classList.toggle('on', e.id === 'v-' + v));
+  $$('nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === v));
+  if (asset) { buyAsset = asset; renderBuy(); }
+  scrollTo(0, 0); renderAll();
+}
+$$('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go, b.dataset.asset)));
+
+const ICON = { buy:'＋', deposit:'＋', swap:'⇄', send:'↗', stake:'%', bridge:'⇆', pay:'🛒' };
+function renderHome(){
+  $('#total').textContent = kes(totalKes());
+  $('#assets').innerHTML = SYMS.map((s) => {
+    const b = S.bal[s]; const m = META[s];
+    return '<div class="asset"><div class="dot" style="background:' + m.c + '">' + m.i + '</div><div class="grow"><b>' + s + '</b><small>' + m.n + '</small></div>'
+      + '<div class="right"><b>' + fmt(b, s) + '</b><small>' + (s === 'KES' ? '' : kes(b * P[s])) + '</small></div></div>';
+  }).join('');
+  $('#pricenote').textContent = pricesLive ? 'Live prices · updated ' + Math.max(0, Math.round((Date.now() - pricesAt) / 1000)) + 's ago (CoinGecko). KQC shows a fixed reference price, not a market price.'
+    : 'Offline estimates. Prices will update when you are online. KQC shows a fixed reference price.';
+  $('#activity').innerHTML = S.tx.length ? S.tx.slice(0, 8).map((t) =>
+    '<div class="tx"><div class="ic">' + (ICON[t.k] || '•') + '</div><div class="grow">' + esc(t.d) + '<small class="muted">' + new Date(t.t).toLocaleString('en-KE', { dateStyle:'medium', timeStyle:'short' }) + '</small></div><b>' + esc(t.v) + '</b></div>').join('')
+    : '<p class="muted">No activity yet. Try buying with M-Pesa.</p>';
+}
+
+/* Buy */
+let buyAsset = 'BTC';
+function renderBuy(){
+  $('#buy-assets').innerHTML = SYMS.map((s) => '<button class="chip' + (s === buyAsset ? ' on' : '') + '" data-a="' + s + '">' + (s === 'KES' ? 'KES (cash)' : s) + '</button>').join('');
+  $$('#buy-assets .chip').forEach((c) => c.onclick = () => { buyAsset = c.dataset.a; renderBuy(); });
+  $('#buy-quick').innerHTML = [500, 1000, 2000, 5000, 10000].map((n) => '<button class="chip" data-n="' + n + '">' + n.toLocaleString() + '</button>').join('');
+  $$('#buy-quick .chip').forEach((c) => c.onclick = () => { $('#buy-amt').value = c.dataset.n; renderBuy(); });
+  const amt = Math.floor(num('#buy-amt'));
+  const fee = buyAsset === 'KES' ? 0 : amt * FEE.buy;
+  const get = buyAsset === 'KES' ? amt : (amt - fee) / P[buyAsset];
+  $('#buy-quote').innerHTML = '<div><span>You pay</span><span>' + kes(amt) + '</span></div><div><span>Fee (' + (buyAsset === 'KES' ? '0' : FEE.buy * 100) + '%)</span><span>' + kes(fee) + '</span></div>'
+    + '<div><span>You get</span><b>' + (amt > 0 ? fmt(get, buyAsset) + ' ' + buyAsset : '—') + '</b></div>'
+    + (buyAsset !== 'KES' ? '<div><span>Rate</span><span>1 ' + buyAsset + ' = ' + kes(P[buyAsset]) + '</span></div>' : '');
+  $('#buy-note').textContent = MODE === 'live' ? 'Real M-Pesa prompt (' + ENV + ').' : 'Demo mode: the M-Pesa prompt is simulated on screen and no money moves.';
+}
+$('#buy-amt').addEventListener('input', renderBuy);
+$('#buy-go').addEventListener('click', () => {
+  const amt = Math.floor(num('#buy-amt')); const phone = normPhone($('#buy-phone').value);
+  const err = $('#buy-err'); err.textContent = '';
+  if (!phone) { err.textContent = 'Enter a valid Safaricom number, e.g. 0712 345 678'; return; }
+  if (amt < 10) { err.textContent = 'Minimum is KES 10'; return; }
+  if (amt > 150000) { err.textContent = 'Maximum per M-Pesa payment is KES 150,000'; return; }
+  S.phone = $('#buy-phone').value; save();
+  const asset = buyAsset, fee = asset === 'KES' ? 0 : amt * FEE.buy, get = asset === 'KES' ? amt : rnd((amt - fee) / P[asset], asset);
+  confirmSheet('Confirm purchase', [['Pay', kes(amt)], ['Receive', fmt(get, asset) + ' ' + asset], ['M-Pesa', '+' + phone]], 'Send M-Pesa prompt', () =>
+    runStk({ phone, amount: amt, label: 'Received ' + fmt(get, asset) + ' ' + asset, onSuccess: () => {
+      S.bal[asset] = rnd(S.bal[asset] + get, asset);
+      addTx(asset === 'KES' ? 'deposit' : 'buy', asset === 'KES' ? 'Added money via M-Pesa' : 'Bought ' + asset + ' via M-Pesa', '+' + fmt(get, asset) + ' ' + asset);
+    } }));
+});
+
+/* Swap */
+let slip = 0.005;
+function swapQuote(){
+  const f = $('#sw-from').value, t = $('#sw-to').value, a = num('#sw-amt');
+  const gross = a * P[f], fee = gross * FEE.swap, out = (gross - fee) / P[t];
+  return { f, t, a, fee, out, min: out * (1 - slip) };
+}
+function renderSwap(){
+  const opts = SYMS.map((s) => '<option>' + s + '</option>').join('');
+  for (const id of ['#sw-from', '#sw-to', '#sd-asset']) if (!$(id).options.length) $(id).innerHTML = opts;
+  if (!renderSwap.init) { $('#sw-from').value = 'KES'; $('#sw-to').value = 'BTC'; renderSwap.init = 1; }
+  $('#sw-slip').innerHTML = [0.001, 0.005, 0.01].map((v) => '<button class="chip' + (v === slip ? ' on' : '') + '" data-s="' + v + '">' + v * 100 + '%</button>').join('');
+  $$('#sw-slip .chip').forEach((c) => c.onclick = () => { slip = +c.dataset.s; renderSwap(); });
+  const q = swapQuote();
+  $('#sw-bal').textContent = 'Balance: ' + fmt(S.bal[q.f], q.f) + ' ' + q.f;
+  $('#sw-out').textContent = q.a > 0 && q.f !== q.t ? fmt(q.out, q.t) : '0';
+  $('#sw-quote').innerHTML = '<div><span>Rate</span><span>1 ' + q.f + ' ≈ ' + fmt(P[q.f] / P[q.t], q.t) + ' ' + q.t + '</span></div><div><span>Fee (0.5%)</span><span>' + kes(q.fee) + '</span></div>'
+    + '<div><span>Minimum received</span><span>' + (q.a > 0 ? fmt(q.min, q.t) + ' ' + q.t : '—') + '</span></div>';
+}
+['#sw-from', '#sw-to', '#sw-amt'].forEach((id) => $(id).addEventListener('input', renderSwap));
+$('#sw-flip').onclick = () => { const f = $('#sw-from').value; $('#sw-from').value = $('#sw-to').value; $('#sw-to').value = f; renderSwap(); };
+$('#sw-max').onclick = () => { const f = $('#sw-from').value; $('#sw-amt').value = flo(S.bal[f], f); renderSwap(); };
+$('#sw-go').onclick = () => {
+  const q = swapQuote(), err = $('#sw-err'); err.textContent = '';
+  if (q.f === q.t) { err.textContent = 'Choose two different assets'; return; }
+  if (!(q.a > 0)) { err.textContent = 'Enter an amount'; return; }
+  if (q.a > S.bal[q.f] + 1e-9) { err.textContent = 'Not enough ' + q.f; return; }
+  const out = rnd(q.out, q.t);
+  if (out <= 0) { err.textContent = 'Amount too small'; return; }
+  confirmSheet('Confirm swap', [['Pay', fmt(q.a, q.f) + ' ' + q.f], ['Receive', '≈ ' + fmt(out, q.t) + ' ' + q.t], ['Minimum', fmt(q.min, q.t) + ' ' + q.t], ['Fee', kes(q.fee)]], 'Swap now', () => {
+    S.bal[q.f] = rnd(Math.max(0, S.bal[q.f] - q.a), q.f); S.bal[q.t] = rnd(S.bal[q.t] + out, q.t);
+    addTx('swap', 'Swapped ' + q.f + ' → ' + q.t, '+' + fmt(out, q.t) + ' ' + q.t);
+    save(); $('#sw-amt').value = ''; toast('✅ Swapped to ' + fmt(out, q.t) + ' ' + q.t); renderAll();
+  });
+};
+
+/* Send */
+const CONTACTS = { Wanjiku:'0x71C7656EC7ab88b098defB751B7401B5f6d8976F', 'Kamau Mart':'0x2546BcD3c84621e976D8185a91A922aE77ECEc30' };
+const ADDR = { KQC:/^0x[0-9a-fA-F]{40}$/, ETH:/^0x[0-9a-fA-F]{40}$/, USDT:/^0x[0-9a-fA-F]{40}$/, BTC:/^(bc1[a-z0-9]{20,70}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/, SOL:/^[1-9A-HJ-NP-Za-km-z]{32,44}$/ };
+function renderSend(){
+  $('#sd-contacts').innerHTML = Object.keys(CONTACTS).map((n) => '<button class="chip" data-n="' + esc(n) + '">' + esc(n) + ' (demo)</button>').join('');
+  $$('#sd-contacts .chip').forEach((c) => c.onclick = () => { $('#sd-to').value = CONTACTS[c.dataset.n]; });
+  const a = $('#sd-asset').value || 'KQC';
+  $('#sd-bal').textContent = 'Balance: ' + fmt(S.bal[a], a) + ' ' + a;
+}
+$('#sd-asset').addEventListener('input', renderSend);
+$('#sd-go').onclick = () => {
+  const a = $('#sd-asset').value, to = $('#sd-to').value.trim(), amt = num('#sd-amt'), err = $('#sd-err'); err.textContent = '';
+  if (a === 'KES') { err.textContent = 'To cash out KES, use M-Pesa withdrawal (coming soon). Swap to a coin to send it.'; return; }
+  if (!ADDR[a].test(to)) { err.textContent = 'That does not look like a valid ' + a + ' address'; return; }
+  if (!(amt > 0)) { err.textContent = 'Enter an amount'; return; }
+  if (amt > S.bal[a] + 1e-9) { err.textContent = 'Not enough ' + a; return; }
+  confirmSheet('Confirm transfer', [['Send', fmt(amt, a) + ' ' + a], ['To', to.slice(0, 8) + '…' + to.slice(-6)], ['Value', kes(amt * P[a])]], 'Send', () => {
+    S.bal[a] = rnd(Math.max(0, S.bal[a] - amt), a); addTx('send', 'Sent ' + a + ' to ' + to.slice(0, 6) + '…' + to.slice(-4), '-' + fmt(amt, a) + ' ' + a);
+    save(); $('#sd-amt').value = ''; toast('✅ Sent'); renderAll();
+  });
+};
+
+/* More: stake / bridge / pay */
+function renderMore(){
+  $('#st-staked').textContent = fmt(S.staked, 'KQC'); $('#st-earned').textContent = fmt(earned(), 'KQC');
+  const b = Object.entries(S.bridged).filter(([, v]) => v > 0).map(([k, v]) => fmt(v, 'KQC') + ' on ' + k).join(', ');
+  $('#br-held').textContent = b ? 'Bridged: ' + b + '.' : '';
+  $('#mode-help').innerHTML = MODE === 'live' ? 'Connected to M-Pesa <b>' + esc(ENV) + '</b>.' : 'Demo mode: everything is simulated on this device. Deploy the backend with your Daraja keys to turn on real M-Pesa prompts.';
+}
+$('#st-stake').onclick = () => {
+  const a = num('#st-amt'), e = $('#st-err'); e.textContent = '';
+  if (!(a > 0)) { e.textContent = 'Enter an amount'; return; } if (a > S.bal.KQC + 1e-9) { e.textContent = 'Not enough KQC'; return; }
+  const r = earned(); S.bal.KQC = rnd(S.bal.KQC - a + r, 'KQC'); S.staked = rnd(S.staked + a, 'KQC'); S.stakeAt = Date.now();
+  addTx('stake', 'Staked KQC', fmt(a, 'KQC') + ' KQC'); save(); $('#st-amt').value = ''; toast('✅ Staked'); renderAll();
+};
+$('#st-unstake').onclick = () => {
+  const a = num('#st-amt') || S.staked, e = $('#st-err'); e.textContent = '';
+  if (S.staked <= 0) { e.textContent = 'Nothing staked'; return; } if (a > S.staked + 1e-9) { e.textContent = 'You only have ' + fmt(S.staked, 'KQC') + ' staked'; return; }
+  const r = earned(); S.staked = rnd(S.staked - a, 'KQC'); S.bal.KQC = rnd(S.bal.KQC + a + r, 'KQC'); S.stakeAt = Date.now();
+  addTx('stake', 'Unstaked + claimed rewards', '+' + fmt(a + r, 'KQC') + ' KQC'); save(); $('#st-amt').value = ''; toast('✅ Unstaked'); renderAll();
+};
+$('#br-go').onclick = () => {
+  const a = num('#br-amt'), c = $('#br-chain').value, e = $('#br-err'); e.textContent = '';
+  const fee = Math.max(1, a * FEE.bridge);
+  if (!(a > fee)) { e.textContent = 'Amount must be more than the fee (' + fmt(fee, 'KQC') + ' KQC)'; return; } if (a > S.bal.KQC + 1e-9) { e.textContent = 'Not enough KQC'; return; }
+  S.bal.KQC = rnd(S.bal.KQC - a, 'KQC'); S.bridged[c] = rnd((S.bridged[c] || 0) + a - fee, 'KQC');
+  addTx('bridge', 'Bridged KQC to ' + c, fmt(a - fee, 'KQC') + ' KQC'); save(); $('#br-amt').value = ''; toast('✅ Bridged to ' + c); renderAll();
+};
+$('#pm-go').onclick = () => {
+  const till = $('#pm-till').value.trim(), a = num('#pm-amt'), f = $('#pm-from').value, e = $('#pm-err'); e.textContent = '';
+  if (!/^\d{5,7}$/.test(till)) { e.textContent = 'Enter a 5–7 digit Till or Paybill number'; return; } if (!(a > 0)) { e.textContent = 'Enter an amount'; return; }
+  const cost = f === 'KES' ? a : a / P.KQC;
+  if (cost > S.bal[f] + 1e-9) { e.textContent = 'Not enough ' + f; return; }
+  confirmSheet('Confirm payment', [['Merchant', till], ['Amount', kes(a)], ['Pay with', fmt(cost, f) + ' ' + f]], 'Pay', () => {
+    S.bal[f] = rnd(Math.max(0, S.bal[f] - cost), f); addTx('pay', 'Paid merchant ' + till, '-' + kes(a)); save(); $('#pm-amt').value = ''; toast('✅ Paid'); renderAll();
+  });
+};
+$('#reset').onclick = () => confirmSheet('Reset wallet data?', [['Mode', MODE]], 'Reset', () => { store.del('kqc2-' + MODE); load(); renderAll(); toast('Reset'); });
+
+function renderAll(){ if (!S) return; renderHome(); renderBuy(); renderSwap(); renderSend(); renderMore(); }
+
+/* ---------- boot ---------- */
+(async function boot(){
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 3500);
+    const r = await fetch('/.netlify/functions/mpesa?a=health', { cache:'no-store', signal: ctl.signal });
+    if (r.ok) { const j = await r.json(); if (j.mpesa) { MODE = 'live'; ENV = j.env; } }
+  } catch { /* stay in demo */ }
+  load();
+  $('#mode').textContent = MODE === 'live' ? 'M-Pesa ' + ENV : 'Demo mode';
+  $('#mode').className = 'pill ' + (MODE === 'live' ? 'live' : 'demo');
+  $('#buy-phone').value = S.phone || '';
+  renderAll(); refreshPrices(); setInterval(refreshPrices, 30000); setInterval(() => { if ($('#v-home').classList.contains('on')) renderHome(); }, 5000);
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+})();
+</script>
+</body>
+</html>

@@ -1,16 +1,9 @@
 [build]
-  publish = "public"
-  functions = "netlify/functions"
+  publish = "."
+  functions = "api"
 
 [functions]
   node_bundler = "esbuild"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "no-referrer"
-    X-Frame-Options = "DENY"
 
 [[headers]]
   for = "/sw.js"
